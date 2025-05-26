@@ -6,8 +6,8 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     validate: {
-      validator: (username) => username.length <= 15,
-      message: () => "username should be of within 15 characters",
+      validator: (username) => username.length >= 5 && username.length <= 15,
+      message: () => "Username should be of within 5 to 15 characters",
     },
   },
   email: {
@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-      message: () => "please enter a valid email",
+      message: () => "Please enter a valid email",
     },
   },
   password: {
@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     validate: {
       validator: (password) =>
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password),
-      message: () => "please enter a strong password",
+      message: () => "Please enter a strong password",
     },
   },
   createdAt: {
