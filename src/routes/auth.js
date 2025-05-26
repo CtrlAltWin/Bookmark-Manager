@@ -15,9 +15,35 @@ authRouter.post("/api/auth/signup", async (req, res) => {
       password: passwordHash,
     });
     await user.save();
-    res.json({ user, message: "User signed up successfully" });
+    res.json({
+      user: { username, email },
+      message: "User signed up successfully",
+    });
   } catch (err) {
     res.status(400).json({ error: err.message || "Error signingup the user" });
+  }
+});
+
+authRouter.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new Error("Invalid Email");
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+    const isPasswordMatching = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatching) {
+      throw new Error("Invalid Credentials");
+    }
+    res.json({
+      user: { username: user.username, email },
+      message: "User signed up successfully",
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "Error loggin in the user" });
   }
 });
 
