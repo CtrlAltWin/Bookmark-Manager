@@ -19,9 +19,27 @@ bookmarkRouter.post("/api/bookmark", async (req, res) => {
   }
 });
 
-// bookmarkRouter.get("/api/bookmark", async(req, res)=> {
+bookmarkRouter.get("/api/bookmark", async (req, res) => {
+  try {
+    const userId = "64f8c9e2a4c8b123456789ab";
+    const { search, tags, category } = req.query;
+    const query = {
+      userId,
+    };
+    if (search)
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    if (tags) query.tags = { $in: tags.split(",") };
+    if (category) query.category = category;
+    const bookmarks = await Bookmark.find(query);
+    res.json(bookmarks);
+  } catch (err) {
+    res.status(400).json({ error: err.message || "error finding bookmarks" });
+  }
+});
 
-// })
 module.exports = {
   bookmarkRouter,
 };
