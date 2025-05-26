@@ -40,6 +40,22 @@ bookmarkRouter.get("/api/bookmark", async (req, res) => {
   }
 });
 
+bookmarkRouter.delete("/api/bookmark/:id", async (req, res) => {
+  try {
+    const userId = "64f8c9e2a4c8b123456789ab";
+    const { id } = req.params;
+    const deleted = await Bookmark.findOneAndDelete({ _id: id, userId });
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ error: "Bookmark not found or unauthorized" });
+    }
+    res.json({ deleted, message: "bookmark deleted successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "Error deleting bookmark" });
+  }
+});
+
 module.exports = {
   bookmarkRouter,
 };
