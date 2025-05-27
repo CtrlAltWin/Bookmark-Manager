@@ -9,6 +9,10 @@ authRouter.post("/api/auth/signup", async (req, res) => {
   try {
     validateSignupData(req.body);
     const { username, email, password } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new Error("User already exists");
+    }
     const passwordHash = await bcrypt.hash(password, 10);
     const user = new User({
       username,
