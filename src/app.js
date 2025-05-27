@@ -3,13 +3,13 @@ const app = express();
 require("dotenv").config();
 const { connectDatabase } = require("./config/database");
 const { bookmarkRouter } = require("./routes/bookmark");
+const {authRouter} = require("./routes/auth")
 const cookieParser = require("cookie-parser");
 app.use(express.json());
 app.use(cookieParser());
 
-/*currently router is under development*/
 app.use("/", bookmarkRouter);
-// app.use("/api/auth", authRouter);
+app.use("/", authRouter);
 
 connectDatabase()
   .then(() => {

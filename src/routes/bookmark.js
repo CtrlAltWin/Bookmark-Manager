@@ -2,10 +2,12 @@ const express = require("express");
 const bookmarkRouter = express.Router();
 const Bookmark = require("../models/bookmark");
 const { validateBookmark } = require("../utils/validation");
-bookmarkRouter.post("/api/bookmark", async (req, res) => {
+const { authenticateUser } = require("../middlewares/authenticateUser");
+
+bookmarkRouter.post("/api/bookmark", authenticateUser, async (req, res) => {
   try {
     validateBookmark(req.body);
-    const userId = "64f8c9e2a4c8b123456789ab";
+    const userId = req.user._id;
     const bookmark = new Bookmark({ ...req.body, userId });
     await bookmark.save();
     res.json({
@@ -19,9 +21,9 @@ bookmarkRouter.post("/api/bookmark", async (req, res) => {
   }
 });
 
-bookmarkRouter.get("/api/bookmark", async (req, res) => {
+bookmarkRouter.get("/api/bookmark", authenticateUser, async (req, res) => {
   try {
-    const userId = "64f8c9e2a4c8b123456789ab";
+    const userId = req.user._id;
     const { search, tags, category } = req.query;
     const query = {
       userId,
@@ -40,21 +42,25 @@ bookmarkRouter.get("/api/bookmark", async (req, res) => {
   }
 });
 
-bookmarkRouter.delete("/api/bookmark/:id", async (req, res) => {
-  try {
-    const userId = "64f8c9e2a4c8b123456789ab";
-    const { id } = req.params;
-    const deleted = await Bookmark.findOneAndDelete({ _id: id, userId });
-    if (!deleted) {
-      return res
-        .status(404)
-        .json({ error: "Bookmark not found or unauthorized" });
+bookmarkRouter.delete(
+  "/api/bookmark/:id",
+  authenticateUser,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+      const { id } = req.params;
+      const deleted = await Bookmark.findOneAndDelete({ _id: id, userId });
+      if (!deleted) {
+        return res
+          .status(404)
+          .json({ error: "Bookmark not found or unauthorized" });
+      }
+      res.json({ deleted, message: "bookmark deleted successfully" });
+    } catch (err) {
+      res.status(400).json({ error: err.message || "Error deleting bookmark" });
     }
-    res.json({ deleted, message: "bookmark deleted successfully" });
-  } catch (err) {
-    res.status(400).json({ error: err.message || "Error deleting bookmark" });
   }
-});
+);
 
 module.exports = {
   bookmarkRouter,
