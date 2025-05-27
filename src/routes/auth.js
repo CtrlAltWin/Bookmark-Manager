@@ -3,6 +3,7 @@ const authRouter = express.Router();
 const { validateSignupData } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
 
 authRouter.post("/api/auth/signup", async (req, res) => {
   try {
@@ -38,9 +39,13 @@ authRouter.post("/api/auth/login", async (req, res) => {
     if (!isPasswordMatching) {
       throw new Error("Invalid Credentials");
     }
+
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    res.cookie("token", token);
+
     res.json({
       user: { username: user.username, email },
-      message: "User signed up successfully",
+      message: "User logged in successfully",
     });
   } catch (err) {
     res.status(400).json({ error: err.message || "Error loggin in the user" });
