@@ -4,7 +4,6 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
     validate: {
       validator: (username) => username.length >= 5 && username.length <= 15,
       message: () => "Username should be of within 5 to 15 characters",
