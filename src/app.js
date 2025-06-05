@@ -27,4 +27,5 @@ connectDatabase()
   })
   .catch((err) => {
     console.log("server is not listning");
+    console.log(err.message);
   });

@@ -4,6 +4,7 @@ const { validateSignupData } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const { authenticateUser } = require("../middlewares/authenticateUser");
 
 authRouter.post("/api/auth/signup", async (req, res) => {
   try {
@@ -43,18 +44,32 @@ authRouter.post("/api/auth/login", async (req, res) => {
     if (!isPasswordMatching) {
       throw new Error("Invalid Credentials");
     }
-
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "5h",
     });
     res.cookie("token", token, { maxAge: 5 * 60 * 60 * 1000 });
-
     res.json({
       user: { username: user.username, email },
       message: "User logged in successfully",
     });
   } catch (err) {
     res.status(400).json({ error: err.message || "Error loggin in the user" });
+  }
+});
+
+authRouter.get("/api/auth/status", authenticateUser, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findOne({ _id: userId });
+    if (!user) throw new Error("Unauthorized or logged out");
+    res.json({
+      user,
+      message: "User logged in",
+    });
+  } catch (err) {
+    res.status(401).json({
+      message: err.message || "Unauthorized",
+    });
   }
 });
 
