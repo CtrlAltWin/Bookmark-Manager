@@ -47,7 +47,12 @@ authRouter.post("/api/auth/login", async (req, res) => {
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "5h",
     });
-    res.cookie("token", token, { maxAge: 5 * 60 * 60 * 1000 });
+    res.cookie("token", token, {
+      maxAge: 5 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
     res.json({
       user: { username: user.username, email },
       message: "User logged in successfully",
@@ -76,7 +81,10 @@ authRouter.get("/api/auth/status", authenticateUser, async (req, res) => {
 authRouter.post("/api/auth/logout", async (req, res) => {
   try {
     res.cookie("token", "", {
-      maxAge: 0,
+      maxAge: 5 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
     });
     res.json({ message: "User logged out successfully" });
   } catch (err) {
